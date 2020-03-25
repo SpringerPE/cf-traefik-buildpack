@@ -16,6 +16,7 @@ DOMAIN=$(jq -r '.uris[0]' <<<"${VCAP_APPLICATION}")
 PORT_HTTP="${PORT_HTTP:-${PORT:-8080}}"
 # To disable the API, undefine the port or change it to 0
 PORT_API="${PORT_API:-$PORT_HTTP}"
+TRAEFIK_DEBUG="${TRAEFIK_DEBUG:-DEBUG}"
 
 # Admin dashboard runs on PORT_API
 ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
@@ -112,7 +113,7 @@ then
 	  sendAnonymousUsage: false
 	log:
 	  format: common
-	  level: INFO
+	  level: ${TRAEFIK_DEBUG}
 	accessLog:
 	  bufferingSize: 10
 	ping:
@@ -134,6 +135,8 @@ then
 	      insecure: true
 	EOF
 fi
+
+cat  "${ADMIN_CONFIGFILE}"
 
 # run
 traefik --configFile="${CONFIGFILE}" "$@"
