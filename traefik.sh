@@ -37,18 +37,10 @@ fi
 ADMIN_CONFIGFILE="${CONFIGDIR_STATIC}/traefik-api.yml"
 
 mkdir -p "${CONFIGDIR_STATIC}"
-[ -r "${CONFIGDIR_STATIC}/traefik.yml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.yml"
-[ -r "${CONFIGDIR_STATIC}/traefik.yaml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.yaml"
-[ -r "${CONFIGDIR_STATIC}/traefik.toml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.toml"
 # [ -r "${CONFIGFILE}" ] || touch "${CONFIGFILE}"
 
 if [ "${ADMIN_ENABLED}" == "1" ] && [ ! -r "${ADMIN_CONFIGFILE}" ]
 then
-	cat <<- EOF >> "${CONFIGFILE}"
-	api:
-	  insecure: false
-	  dashboard: true
-	EOF
     [ "${PORT_API}" != "${PORT_HTTP}" ] && ADMIN_ENTRYPOINT="admin"
     if [ -z "${ADMIN_AUTH_PASSWORD}" ]
     then
@@ -81,23 +73,31 @@ fi
 # if configfile is empty, generate one based on the environment variables
 if [ ! -s "${CONFIGFILE}" ]
 then
-	echo "* Using env variables to generate configuration ..."
-    if [ "${ADMIN_ENABLED}" == "1" ] && [ "x${ADMIN_PROMETHEUS}" == "x1" ]
+    echo "* Using env variables to generate configuration ..."
+    if [ "${ADMIN_ENABLED}" == "1" ]
     then
-        cat <<- EOF >> "${ADMIN_CONFIGFILE}"
-		    metrics:
-		      entryPoints:
-		      - ${ADMIN_ENTRYPOINT}
-		      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && PathPrefix(\`/metrics\`)"
-		      service: 'api@internal'
+        cat <<- EOF >> "${CONFIGFILE}"
+		api:
+		  insecure: false
+		  dashboard: true
 		EOF
-        cat <<- EOF > "${CONFIGFILE}"
-		metrics:
-		  prometheus:
-		    addEntryPointsLabels: true
-		    addServicesLabels: true
-		    entryPoint: "${ADMIN_ENTRYPOINT}"
-		EOF
+        if [ "x${ADMIN_PROMETHEUS}" == "x1" ]
+        then
+            cat <<- EOF >> "${ADMIN_CONFIGFILE}"
+			    metrics:
+			      entryPoints:
+			      - ${ADMIN_ENTRYPOINT}
+			      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && PathPrefix(\`/metrics\`)"
+			      service: 'api@internal'
+			EOF
+            cat <<- EOF >> "${CONFIGFILE}"
+			metrics:
+			  prometheus:
+			    addEntryPointsLabels: true
+			    addServicesLabels: true
+			    entryPoint: "${ADMIN_ENTRYPOINT}"
+			EOF
+        fi
     fi
 	cat <<- EOF >> "${CONFIGFILE}"
 	global:
