@@ -128,12 +128,15 @@ then
 	EOF
 fi
 
+sleep 2
+
 echo ---
-echo "${ADMIN_CONFIGFILE}"
+cat  "${ADMIN_CONFIGFILE}"
 echo ---
 cat "${CONFIGFILE}"
 echo ---
 
+sleep 3
 # run
 traefik --configFile="${CONFIGFILE}" "$@"
 
