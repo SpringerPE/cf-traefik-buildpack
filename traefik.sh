@@ -66,7 +66,7 @@ then
 	      realm: "${ADMIN_HOST}"
 	      basicAuth:
 	        users:
-	        - "${ADMIN_AUTH_USER}:$(openssl passwd -crypt ${ADMIN_AUTH_PASSWORD})"
+	        - \""${ADMIN_AUTH_USER}:$(openssl passwd -apr1 ${ADMIN_AUTH_PASSWORD})"\"
 	  routers:
 	    api:
 	      entryPoints:
