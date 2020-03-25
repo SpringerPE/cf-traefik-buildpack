@@ -114,15 +114,11 @@ then
 	  level: ${TRAEFIK_DEBUG}
 	accessLog:
 	  bufferingSize: 10
-	ping:
-	  entryPoint: "ping"
 	providers:
 	  file:
 	    directory: "${CONFIGDIR_STATIC}"
 	    watch: false
 	entryPoints:
-	  ping:
-	    address: "127.0.0.1:8181"
 	  admin:
 	    address: ":${PORT_API}"
 	  http:
