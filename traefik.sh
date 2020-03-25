@@ -40,7 +40,7 @@ mkdir -p "${CONFIGDIR_STATIC}"
 [ -r "${CONFIGDIR_STATIC}/traefik.yml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.yml"
 [ -r "${CONFIGDIR_STATIC}/traefik.yaml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.yaml"
 [ -r "${CONFIGDIR_STATIC}/traefik.toml" ] && CONFIGFILE="${CONFIGDIR_STATIC}/traefik.toml"
-[ -r "${CONFIGFILE}" ] || touch "${CONFIGFILE}"
+# [ -r "${CONFIGFILE}" ] || touch "${CONFIGFILE}"
 
 if [ "${ADMIN_ENABLED}" == "1" ] && [ ! -r "${ADMIN_CONFIGFILE}" ]
 then
