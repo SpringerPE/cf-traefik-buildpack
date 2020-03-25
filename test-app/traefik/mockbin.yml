@@ -1,0 +1,55 @@
+
+## Dynamic configuration
+http:
+  services:
+    mockbin:
+      loadBalancer:
+        servers:
+        - url: "http://mockbin.org/request"
+
+  routers:
+    mockbin:
+      # https://docs.traefik.io/routing/routers/#rule
+      rule: "Path(`/open`)"
+      service: mockbin
+
+    mockbin-auth:
+      rule: "Path(`/auth`)"
+      service: mockbin
+      entryPoints:
+      - "internal"
+      - "http"
+
+  middlewares:
+    key-auth:
+      basicAuth:
+        realm: "Mockbin"
+        users:
+          - "bob:$apr1$BSlChtqX$Bv6T9QQ1riKXEEJZTHlmH."
+        # usersFile: "/path/to/my/usersfile"
+
+    # Other middledwares
+    test-auth:
+      forwardAuth:
+        address: "https://authserver.com/auth"
+    test-ipwhitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "192.168.1.7"
+        ipStrategy:
+          depth: 2
+    latency-check:
+      circuitBreaker:
+        expression: "LatencyAtQuantileMS(50.0) > 100"
+    test-ratelimit:
+      rateLimit:
+        average: 100
+        burst: 50
+    test-retry:
+      retry:
+       attempts: 4
+    add-foo-prefix:
+      addPrefix:
+        prefix: "/foo"
+

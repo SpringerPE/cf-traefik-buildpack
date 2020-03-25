@@ -6,9 +6,9 @@ applications:
   random-route: true
   buildpacks:
   - https://github.com/SpringerPE/cf-traefik-buildpack.git
-# env:
-#   PORT_API
+  env:
+    ADMIN_AUTH_PASSWORD: hola
+    ADMIN_AUTH_USER: admin
+#   PORT_INTERNAL
 #   ADMIN_HOST: "admin.springernature.app"
-#   ADMIN_AUTH_PASSWORD
-#   ADMIN_AUTH_USER: admin
 #   ADMIN_PROMETHEUS: "1"
