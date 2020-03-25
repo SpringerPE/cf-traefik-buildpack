@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# https://docs.cloudfoundry.org/buildpacks/understand-buildpacks.html
+
+BUILD_DIR="${1}"
+CACHE_DIR="${2}"
+DEPS_DIR="${3}"
+DEPS_IDX="${4}"
+
+# dependencies paths
+TRAEFIK_DIR="${DEPS_DIR}/${DEPS_IDX}/traefik"
+BUILDPACK_DIR=$(dirname $(readlink -f ${BASH_SOURCE%/*}))
+
+if [ -f "${BUILD_DIR}/runtime.txt" ]
+then
+    VERSION_TRAEFIK=$((grep -v '^#' "${BUILD_DIR}/runtime.txt" || true) | head -n1)
+    if [ -z "${VERSION_TRAEFIK}" ]
+    then
+        echo "ERROR> runtime.txt found but no version specified!"
+        exit 1
+    fi
+fi
+
+source ${BUILDPACK_DIR}/traefik-parameters.sh
+
+if [ -f "${CACHE_DIR}/traefik-${VERSION_TRAEFIK}.tgz" ]
+then
+    echo "-----> Using traefik ${VERSION_TRAEFIK} from cache"
+else
+    echo "-----> Downloading traefik : ${DOWNLOAD_URL_TRAEFIK}"
+    if ! wget -nv "${DOWNLOAD_URL_TRAEFIK}" -O "${CACHE_DIR}/traefik-${VERSION_TRAEFIK}.tgz" 2>&1 | sed 's/^/       /'
+    then
+        echo "ERROR> traefik version ${VERSION_TRAEFIK} not found, URL=${DOWNLOAD_URL_TRAEFIK}"
+        exit 1
+    fi
+fi
+
+echo "-----> Installing traefik"
+mkdir -p "${TRAEFIK_DIR}/bin"
+pushd "${TRAEFIK_DIR}/bin" > /dev/null
+    tar zxvf "${CACHE_DIR}/traefik-${VERSION_TRAEFIK}.tgz"
+    chmod +x "traefik"
+popd
