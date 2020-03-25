@@ -15,23 +15,23 @@ CONFIGFILE="${CONFIGFILE:-${APP_ROOT}/traefik.yml}"
 DOMAIN=$(jq -r '.uris[0]' <<<"${VCAP_APPLICATION}")
 PORT_HTTP="${PORT_HTTP:-${PORT:-8080}}"
 # To disable the API, undefine the port or change it to 0
-PORT_API="${PORT_API:-$PORT_HTTP}"
+PORT_INTERNAL="${PORT_INTERNAL:-$PORT_HTTP}"
 TRAEFIK_DEBUG="${TRAEFIK_DEBUG:-DEBUG}"
 
-# Admin dashboard runs on PORT_API
+# Admin dashboard runs on PORT_INTERNAL
 ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
 ADMIN_AUTH_USER="${ADMIN_AUTH_USER:-admin}"
 ADMIN_AUTH_PASSWORD="${ADMIN_AUTH_PASSWORD:-}"
 ADMIN_PROMETHEUS="${ADMIN_PROMETHEUS:-1}"
 
 ###
-ADMIN_ENTRYPOINT="admin"
+ADMIN_ENTRYPOINT="internal"
 ADMIN_ENABLED=1
-if [ -z "${PORT_API}" ]
+if [ -z "${PORT_INTERNAL}" ]
 then
     ADMIN_ENABLED=0
-    PORT_API=0
-elif [ "${PORT_API}" == "0" ]
+    PORT_INTERNAL=0
+elif [ "${PORT_INTERNAL}" == "0" ]
 then
     ADMIN_ENABLED=0
 fi
@@ -42,11 +42,11 @@ mkdir -p "${CONFIGDIR_STATIC}"
 
 if [ "${ADMIN_ENABLED}" == "1" ] && [ ! -r "${ADMIN_CONFIGFILE}" ]
 then
-    if [ "${PORT_API}" == "${PORT_HTTP}" ]
+    if [ "${PORT_INTERNAL}" == "${PORT_HTTP}" ]
     then
         ADMIN_ENTRYPOINT="http"
-        # It does not matter PORT_API at this point
-        PORT_API=8090
+        # It does not matter PORT_INTERNAL at this point
+        PORT_INTERNAL=8090
     fi
     if [ -z "${ADMIN_AUTH_PASSWORD}" ]
     then
@@ -119,8 +119,12 @@ then
 	    directory: "${CONFIGDIR_STATIC}"
 	    watch: false
 	entryPoints:
-	  admin:
-	    address: ":${PORT_API}"
+	  internal:
+	    address: ":${PORT_INTERNAL}"
+	    proxyProtocol:
+	      insecure: true
+	    forwardedHeaders:
+	      insecure: true
 	  http:
 	    address: ":${PORT_HTTP}"
 	    proxyProtocol:
@@ -129,8 +133,6 @@ then
 	      insecure: true
 	EOF
 fi
-
-cat  "${ADMIN_CONFIGFILE}"
 
 # run
 traefik --configFile="${CONFIGFILE}" "$@"
