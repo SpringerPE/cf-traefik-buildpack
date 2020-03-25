@@ -13,9 +13,9 @@ CONFIGFILE="${CONFIGFILE:-${APP_ROOT}/traefik.yml}"
 # defined it takes the first assigned domain to the app, so, by default
 # the admin interface will only be available there
 DOMAIN=$(jq -r '.uris[0]' <<<"${VCAP_APPLICATION}")
-PORT_HTTP="${PORT:-8080}"
+PORT_HTTP="${PORT_HTTP:-${PORT:-8080}}"
 # To disable the API, undefine the port or change it to 0
-PORT_API="${PORT_API:-8090}"
+PORT_API="${PORT_API:-$PORT_HTTP}"
 
 # Admin dashboard runs on PORT_API
 ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
@@ -53,7 +53,7 @@ then
     then
         # Generate a random pass, lenght = 10
         ADMIN_AUTH_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1 || true)
-        echo "* Generated ${ADMIN_AUTH_USER} password in ${APP_ROOT}/${ADMIN_AUTH_USER}.password"
+        echo "* Generated ${ADMIN_AUTH_USER} password:  ${ADMIN_AUTH_PASSWORD}"
         echo "${ADMIN_AUTH_PASSWORD}" > "${APP_ROOT}/${ADMIN_AUTH_USER}.password"
     fi
     [ "${DOMAIN}" == "localhost" ] && ADMIN_HOST="localhost"
@@ -135,15 +135,6 @@ then
 	EOF
 fi
 
-sleep 2
-
-echo ---
-cat  "${ADMIN_CONFIGFILE}"
-echo ---
-cat "${CONFIGFILE}"
-echo ---
-
-sleep 3
 # run
 traefik --configFile="${CONFIGFILE}" "$@"
 
