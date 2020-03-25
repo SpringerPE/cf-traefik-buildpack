@@ -7,11 +7,22 @@ http:
         servers:
         - url: "http://mockbin.org/request"
 
+# Mirror example
+#    mirrored-api:
+#      mirroring:
+#        service: appv1
+#        mirrors:
+#        - name: appv2
+#          percent: 10
+
   routers:
     mockbin:
       # https://docs.traefik.io/routing/routers/#rule
       rule: "Path(`/open`)"
       service: mockbin
+      entryPoints:
+      - "internal"
+      - "http"
 
     mockbin-auth:
       rule: "Path(`/auth`)"
