@@ -25,7 +25,7 @@ ADMIN_AUTH_PASSWORD="${ADMIN_AUTH_PASSWORD:-}"
 ADMIN_PROMETHEUS="${ADMIN_PROMETHEUS:-1}"
 
 ###
-
+ADMIN_ENTRYPOINT="admin"
 ADMIN_ENABLED=1
 if [ -z "${PORT_API}" ]
 then
@@ -47,8 +47,6 @@ then
         ADMIN_ENTRYPOINT="http"
         # It does not matter PORT_API at this point
         PORT_API=8090
-    else
-        ADMIN_ENTRYPOINT="admin"
     fi
     if [ -z "${ADMIN_AUTH_PASSWORD}" ]
     then
