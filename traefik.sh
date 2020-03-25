@@ -15,7 +15,7 @@ CONFIGFILE="${CONFIGFILE:-${APP_ROOT}/traefik.yml}"
 DOMAIN=$(jq -r '.uris[0]' <<<"${VCAP_APPLICATION}")
 PORT_HTTP="${PORT:-8080}"
 # To disable the API, undefine the port or change it to 0
-PORT_API="${PORT_API:-$PORT_HTTP}"
+PORT_API="${PORT_API:-8090}"
 
 # Admin dashboard runs on PORT_API
 ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
@@ -24,7 +24,7 @@ ADMIN_AUTH_PASSWORD="${ADMIN_AUTH_PASSWORD:-}"
 ADMIN_PROMETHEUS="${ADMIN_PROMETHEUS:-1}"
 
 ###
-ADMIN_ENTRYPOINT="http"
+
 ADMIN_ENABLED=1
 if [ -z "${PORT_API}" ]
 then
@@ -41,7 +41,14 @@ mkdir -p "${CONFIGDIR_STATIC}"
 
 if [ "${ADMIN_ENABLED}" == "1" ] && [ ! -r "${ADMIN_CONFIGFILE}" ]
 then
-    [ "${PORT_API}" != "${PORT_HTTP}" ] && ADMIN_ENTRYPOINT="admin"
+    if [ "${PORT_API}" == "${PORT_HTTP}" ]
+    then
+        ADMIN_ENTRYPOINT="http"
+        # It does not matter PORT_API at this point
+        PORT_API=8090
+    else
+        ADMIN_ENTRYPOINT="admin"
+    fi
     if [ -z "${ADMIN_AUTH_PASSWORD}" ]
     then
         # Generate a random pass, lenght = 10
