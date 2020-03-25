@@ -16,7 +16,7 @@ DOMAIN=$(jq -r '.uris[0]' <<<"${VCAP_APPLICATION}")
 PORT_HTTP="${PORT_HTTP:-${PORT:-8080}}"
 # To disable the API, undefine the port or change it to 0
 PORT_INTERNAL="${PORT_INTERNAL:-$PORT_HTTP}"
-TRAEFIK_DEBUG="${TRAEFIK_DEBUG:-DEBUG}"
+TRAEFIK_DEBUG="${TRAEFIK_DEBUG:-INFO}"
 
 # Admin dashboard runs on PORT_INTERNAL
 ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
