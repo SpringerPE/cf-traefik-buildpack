@@ -4,8 +4,9 @@ http:
   services:
     mockbin:
       loadBalancer:
+        passHostHeader: false
         servers:
-        - url: "http://mockbin.org/request"
+        - url: "http://mockbin.org"
 
 # Mirror example
 #    mirrored-api:
@@ -18,20 +19,25 @@ http:
   routers:
     mockbin:
       # https://docs.traefik.io/routing/routers/#rule
-      rule: "Path(`/open`)"
+      rule: "PathPrefix(`/open`)"
       service: mockbin
-      entryPoints:
-      - "internal"
-      - "http"
+      middlewares:
+      - request-service-prefix
 
     mockbin-auth:
-      rule: "Path(`/auth`)"
+      rule: "PathPrefix(`/auth`)"
       service: mockbin
+      middlewares:
+      - request-service-prefix
+      - key-auth
       entryPoints:
       - "internal"
       - "http"
 
   middlewares:
+    request-service-prefix:
+      addPrefix:
+        prefix: "/requests"
     key-auth:
       basicAuth:
         realm: "Mockbin"
@@ -60,7 +66,5 @@ http:
     test-retry:
       retry:
        attempts: 4
-    add-foo-prefix:
-      addPrefix:
-        prefix: "/foo"
+
 
