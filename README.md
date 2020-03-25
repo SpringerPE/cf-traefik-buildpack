@@ -24,7 +24,7 @@ applications:
 #   ADMIN_PROMETHEUS: "1"
 ```
 
-and go to `https:<route>/internal/dashboard`, use the default credentials.
+and go to `https:<route>/dashboard`, use the default credentials.
 
 If you want to see an example service, have a look at `test-app` folder and
 run `curl https:<route>/open` or `curl https:<route>/auth`.

@@ -39,5 +39,6 @@ echo "-----> Installing traefik"
 mkdir -p "${TRAEFIK_DIR}/bin"
 pushd "${TRAEFIK_DIR}/bin" > /dev/null
     tar zxf "${CACHE_DIR}/traefik-${VERSION_TRAEFIK}.tgz"
-    chmod +x "traefik"
-popd
+    chmod +x traefik
+popd > /dev/null
+
