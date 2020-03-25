@@ -23,6 +23,8 @@ ADMIN_HOST="${ADMIN_HOST:-$DOMAIN}"
 ADMIN_AUTH_USER="${ADMIN_AUTH_USER:-admin}"
 ADMIN_AUTH_PASSWORD="${ADMIN_AUTH_PASSWORD:-}"
 ADMIN_PROMETHEUS="${ADMIN_PROMETHEUS:-1}"
+ADMIN_PREFIX="${ADMIN_PREFIX:-/internal}"
+
 
 ###
 ADMIN_ENTRYPOINT="internal"
@@ -60,19 +62,19 @@ then
 	# API Configuration
 	http:
 	  middlewares:
-	    auth:
+	    internal-auth:
 	      realm: "${ADMIN_HOST}"
 	      basicAuth:
 	        users:
 	        - "${ADMIN_AUTH_USER}:$(openssl passwd -apr1 ${ADMIN_AUTH_PASSWORD})"
 	  routers:
-	    api:
+	    internal:
 	      entryPoints:
 	      - ${ADMIN_ENTRYPOINT}
-	      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && (PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`))"
+	      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && (PathPrefix(\`${ADMIN_PREFIX}/api\`) || PathPrefix(\`${ADMIN_PREFIX}/dashboard\`))"
 	      service: 'api@internal'
 	      middlewares:
-	      - auth
+	      - internal-auth
 	EOF
 fi
 
@@ -93,7 +95,7 @@ then
 			    metrics:
 			      entryPoints:
 			      - ${ADMIN_ENTRYPOINT}
-			      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && PathPrefix(\`/metrics\`)"
+			      rule: "(Host(\`${ADMIN_HOST}\`) || Host(\`127.0.0.1\`)) && PathPrefix(\`${ADMIN_PREFIX}/metrics\`)"
 			      service: 'api@internal'
 			EOF
             cat <<- EOF >> "${CONFIGFILE}"
